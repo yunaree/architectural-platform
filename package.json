@@ -1,5 +1,5 @@
 {
-  "name": "my-turborepo",
+  "name": "architectural-platform",
   "private": true,
   "scripts": {
     "build": "turbo run build",
