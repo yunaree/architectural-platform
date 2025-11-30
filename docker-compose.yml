@@ -1,0 +1,18 @@
+version: '3'
+services:
+  architectural-db:
+    image: postgres:15-alpine
+    container_name: architectural_db
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - architectural_data:/var/lib/postgresql/data
+
+volumes:
+  architectural_data:
