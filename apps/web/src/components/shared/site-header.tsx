@@ -36,7 +36,7 @@ export function SiteHeader() {
     }
 
     return (
-        <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4">
+        <header className="sticky top-0 z-5000 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4">
             <div className="flex flex-col md:flex-row md:h-14 items-center ">
                 {/* Верхній ряд (Logo + Actions) для мобільних / Єдиний ряд для десктопу */}
                 <div className="flex w-full h-14 items-center justify-between">

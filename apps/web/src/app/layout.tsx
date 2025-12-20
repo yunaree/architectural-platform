@@ -4,6 +4,7 @@ import "./globals.css";
 import {cn} from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
 import {SiteHeader} from "@/components/shared/site-header";
+import {SiteFooter} from "@/components/shared/site-footer";
 
 export const metadata: Metadata = {
   title: "ArchiCompare",
@@ -28,6 +29,7 @@ export default function RootLayout({
       >
           <SiteHeader/>
           {children}
+          <SiteFooter/>
       </ThemeProvider>
       </body>
       </html>
