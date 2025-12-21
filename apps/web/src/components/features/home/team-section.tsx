@@ -1,11 +1,18 @@
 'use client'
 import React from 'react';
-import {RotatingEarth} from "@/components/features/home/rotating-earth";
 import dynamic from "next/dynamic";
 
 const AnimatedTestimonials = dynamic(
     () => import("@/components/ui/shadcn-io/animated-testimonials").then((mod) => mod.AnimatedTestimonials),
     { ssr: false }
+);
+
+const RotatingEarth = dynamic(
+    () => import("@/components/features/home/rotating-earth").then((mod) => mod.RotatingEarth),
+    {
+        ssr: false,
+        loading: () => <div className="w-full h-full bg-transparent" />
+    }
 );
 
 const testimonials = [
@@ -48,18 +55,18 @@ const testimonials = [
 
 const TeamSection = () => {
     return (
-        <section className="relative h-screen  overflow-hidden">
-            <div className="absolute left-16 top-1/2 -translate-y-1/2 z-10">
-                <h2 className="text-4xl font-semibold mb-6">
-                    People, that worked at this project
-                </h2>
+        <section className="relative h-screen items-center overflow-hidden container mx-auto">
+                <div className="absolute left-16 top-1/2 -translate-y-1/2 z-10">
+                    <h2 className="text-4xl font-semibold mb-6">
+                        People, that worked at this project
+                    </h2>
 
-                <AnimatedTestimonials testimonials={testimonials}/>
-            </div>
+                    <AnimatedTestimonials testimonials={testimonials}/>
+                </div>
 
-            <div className="absolute -right-[220px] top-1/2 -translate-y-1/2 w-[700px] h-[700px] pointer-events-none">
-                <RotatingEarth/>
-            </div>
+                <div className="absolute -right-[220px] top-1/2 -translate-y-1/2 w-[700px] h-[700px] pointer-events-none">
+                    <RotatingEarth/>
+                </div>
         </section>
     );
 };

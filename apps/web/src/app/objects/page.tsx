@@ -22,7 +22,6 @@ import {
 import {ObjectCard} from "@/components/features/objects/object-card";
 import {ObjectEntity} from "@/types/objects";
 
-// --- 1. SKELETON COMPONENT (Для стану завантаження) ---
 function ObjectsSkeleton({ viewMode }: { viewMode: "grid" | "list" }) {
     return (
         <div className={cn(
@@ -52,9 +51,11 @@ const MOCK_RESULTS: ObjectEntity[] = [
     { id: 4, title: "Chernivtsi University", description: "Restoration of the authentic mosaic tiles in the main hall.", tags: ["UNESCO", "Interior"] },
     { id: 5, title: "Odesa Fine Arts Museum", description: "Underground structural reinforcement and facade painting.", tags: ["Classicism", "Museum"] },
     { id: 6, title: "Potocki Palace", description: "Landscape design restoration and gate reconstruction.", tags: ["Palace", "Landscape"] },
+    { id: 7, title: "Potocki Palace", description: "Landscape design restoration and gate reconstruction.", tags: ["Palace", "Landscape"] },
+    { id: 8, title: "Potocki Palace", description: "Landscape design restoration and gate reconstruction.", tags: ["Palace", "Landscape"] },
+    { id: 9, title: "Potocki Palace", description: "Landscape design restoration and gate reconstruction.", tags: ["Palace", "Landscape"] },
 ];
 
-// --- 2. MAIN PAGE COMPONENT ---
 export default function ObjectsPage() {
     const searchParams = useSearchParams();
     const searchQuery = searchParams.get("q") || "Architecture";
@@ -171,6 +172,7 @@ export default function ObjectsPage() {
                         <Input placeholder="Search tags..." className="pl-8" />
                     </div>
                     <FiltersContent />
+                    <Button className={"w-full"} variant={"outline"} disabled={true}>Clear all</Button>
                 </aside>
 
                 {/* MAIN CONTENT */}
