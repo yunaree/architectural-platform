@@ -1,0 +1,40 @@
+@startuml Like_Workflow
+autonumber
+
+actor "Користувач" as User
+participant "Frontend (Next.js)" as Client
+participant "API (Strapi)" as API
+database "PostgreSQL" as DB
+
+User -> Client: Натискає кнопку "Like"
+activate Client
+
+Client -> Client: Перевіряє LocalStorage\n(чи є fingerprint?)
+
+alt Fingerprint відсутній
+    Client -> Client: Генерує новий UUID
+    Client -> Client: Зберігає в LocalStorage
+end
+
+Client -> API: POST /api/likes\n{ objectId: 123, fingerprint: "xyz" }
+activate API
+
+API -> DB: SELECT * FROM likes\nWHERE fingerprint = "xyz"\nAND object_id = 123
+activate DB
+DB --> API: Результат (Пусто або Знайдено)
+deactivate DB
+
+alt Вже лайкнув (Знайдено)
+    API --> Client: 409 Conflict / "Ви вже голосували"
+    Client -> User: Повідомлення: "Голос вже враховано"
+else Ще не лайкнув (Пусто)
+    API -> DB: INSERT INTO likes ...
+    API -> DB: UPDATE objects SET likes_count + 1
+    DB --> API: Success
+    API --> Client: 200 OK (New Count)
+    Client -> User: Оновлення лічильника (+1)
+end
+
+deactivate API
+deactivate Client
+@enduml

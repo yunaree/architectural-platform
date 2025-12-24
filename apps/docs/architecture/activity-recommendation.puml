@@ -1,0 +1,38 @@
+@startuml Recommendation_Algorithm
+start
+
+:Користувач відкриває об'єкт (CurrentObject);
+:Отримати теги та стиль CurrentObject;
+note right
+  Наприклад:
+  Style: Baroque
+  Tags: [Church, Stone]
+end note
+
+:Запит до БД: Знайти всі інші об'єкти;
+
+partition "Цикл оцінювання (Scoring)" {
+  while (Для кожного об'єкта-кандидата?) is (так)
+    :Score = 0;
+
+    if (Style збігається?) then (так)
+      :Score += 10;
+    endif
+
+    if (Спільні теги > 0?) then (так)
+      :Кількість збігів * 2;
+      :Score += (Matches * 2);
+    endif
+
+    if (Країна збігається?) then (так)
+      :Score += 3;
+    endif
+  endwhile (ні)
+}
+
+:Відсортувати кандидатів за Score (DESC);
+:Відфільтрувати тих, у кого Score = 0;
+:Взяти ТОП-4 результати;
+
+stop
+@enduml

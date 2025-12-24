@@ -1,0 +1,39 @@
+@startuml Architectural_Platform_UseCase
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Відвідувач" as User
+actor "Адміністратор (Strapi)" as Admin
+
+package "Архітектурна Платформа" {
+
+  package "Перегляд та Пошук" {
+    usecase "Перегляд 'До/Після'" as UC1
+    usecase "Перегляд 3D моделі" as UC2
+    usecase "Пошук (Fuzzy Search)" as UC3
+    usecase "Фільтрація (Теги/Країни)" as UC4
+  }
+
+  package "Взаємодія" {
+    usecase "Лайк об'єкта\n(без реєстрації)" as UC5
+    usecase "Отримання рекомендацій\n(Алгоритм)" as UC6
+  }
+
+  package "Управління контентом" {
+    usecase "Додавання об'єкта" as UC7
+    usecase "Завантаження .glb файлів" as UC8
+    usecase "Управління тегами" as UC9
+  }
+}
+
+User --> UC1
+User --> UC2
+User --> UC3
+User --> UC4
+User --> UC5
+User --> UC6
+
+Admin --> UC7
+Admin --> UC8
+Admin --> UC9
+@enduml

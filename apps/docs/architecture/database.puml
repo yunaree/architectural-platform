@@ -1,0 +1,85 @@
+@startuml Architectural_Platform_DB
+
+!theme plain
+hide circle
+skinparam linetype ortho
+
+' --- CLASSES ---
+
+entity "ArchitecturalObject" as Object {
+  *id : UUID <<PK>>
+  --
+  *title : Text
+  *slug : String <<Unique>>
+  description : RichText
+
+  ' --- Visual Comparison ---
+  beforeImage : MediaURL
+  afterImage : MediaURL
+
+  ' --- 3D Viewer (Optional) ---
+  modelFile : MediaURL (.glb/.gltf) <<Nullable>>
+  modelConfig : JSON {zoom, lighting} <<Nullable>>
+
+  ' --- Metadata ---
+  year : Integer
+  locationCoords : JSON {lat, lng}
+  views : Integer (Default: 0)
+
+  ' --- Status (Optional context) ---
+  status : Enum (completed, in-progress)
+
+  --
+  publishedAt : DateTime
+}
+
+entity "Tag" as Tag {
+  *id : Integer <<PK>>
+  --
+  *name : String
+  *slug : String <<Unique>>
+  type : Enum (style, feature, material)
+  --
+  description : Text
+}
+
+entity "Country" as Country {
+  *id : Integer <<PK>>
+  --
+  *name : String
+  *code : String (ISO-2)
+}
+
+entity "Like" as Like {
+  *id : Integer <<PK>>
+  --
+  *fingerprint : String <<Indexed>>
+  createdAt : DateTime
+}
+
+' --- RELATIONSHIPS ---
+
+' Країна має багато обєктів (1-to-Many)
+Country ||..o{ Object : "has"
+
+' Обєкт має багато тегів (Many-to-Many)
+' Це головний спосіб категоризації (стиль, матеріали, тип)
+Object }|..|{ Tag : "tagged with"
+
+' Обєкт має багато лайків (1-to-Many)
+Object ||..o{ Like : "receives"
+
+note right of Object
+  <b>3D Viewer Logic:</b>
+  If <i>modelFile</i> is present, show
+  "View in 3D" button on the frontend.
+  Use <i>modelConfig</i> to fix camera position.
+end note
+
+note left of Tag
+  <b>Flexible Taxonomy:</b>
+  Uses tags for styles (Baroque)
+  and features (Ruins, Palace).
+end note
+
+@enduml
