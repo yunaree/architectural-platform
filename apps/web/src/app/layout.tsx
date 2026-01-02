@@ -8,6 +8,7 @@ import {SiteFooter} from "@/components/shared/site-footer";
 import { SnowProvider } from "@/context/snow-context";
 import {SnowOverlay} from "@/components/features/snowfall/snow-overlay";
 import {SnowToggle} from "@/components/features/snowfall/snow-toggle";
+import Providers from "@/app/providers";
 
 export const metadata: Metadata = {
   title: "ArchiCompare",
@@ -31,6 +32,7 @@ export default function RootLayout({
                 inter.variable // Додав змінну шрифта, щоб font-sans працював коректно
             )}
         >
+        <Providers>
         <ThemeProvider
             attribute="class"
             defaultTheme="system"
@@ -58,6 +60,7 @@ export default function RootLayout({
 
             </SnowProvider>
         </ThemeProvider>
+        </Providers>
         </body>
         </html>
   );

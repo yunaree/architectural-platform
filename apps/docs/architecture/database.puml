@@ -26,9 +26,6 @@ entity "ArchitecturalObject" as Object {
   locationCoords : JSON {lat, lng}
   views : Integer (Default: 0)
 
-  ' --- Status (Optional context) ---
-  status : Enum (completed, in-progress)
-
   --
   publishedAt : DateTime
 }
@@ -38,9 +35,6 @@ entity "Tag" as Tag {
   --
   *name : String
   *slug : String <<Unique>>
-  type : Enum (style, feature, material)
-  --
-  description : Text
 }
 
 entity "Country" as Country {
@@ -54,7 +48,6 @@ entity "Like" as Like {
   *id : Integer <<PK>>
   --
   *fingerprint : String <<Indexed>>
-  createdAt : DateTime
 }
 
 ' --- RELATIONSHIPS ---

@@ -5,7 +5,20 @@ export default [
   'strapi::cors',
   'strapi::poweredBy',
   'strapi::query',
-  'strapi::body',
+  {
+    name: 'strapi::body',
+    config: {
+      formidable: {
+        // Збільшуємо максимальний розмір файлу (на всяк випадок)
+        maxFileSize: 200 * 1024 * 1024, // 200mb
+
+        // Зберігаємо тимчасові файли прямо в папку проєкту, а не в системний Temp.
+        // Це часто допомагає уникнути блокування антивірусом.
+        uploadDir: './public/uploads/tmp',
+        keepExtensions: true,
+      },
+    },
+  },
   'strapi::session',
   'strapi::favicon',
   'strapi::public',

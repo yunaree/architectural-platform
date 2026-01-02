@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import React, { useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { LayoutGrid, List, SlidersHorizontal, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,18 +9,17 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { FeatureCard } from "@/components/features/home/feature-card"; // Твоя картка
 import {
     Pagination,
     PaginationContent,
-    PaginationEllipsis,
     PaginationItem,
     PaginationLink,
     PaginationNext,
     PaginationPrevious,
-} from "@/components/ui/pagination"
-import {ObjectCard} from "@/components/features/objects/object-card";
-import {ObjectEntity} from "@/types/objects";
+} from "@/components/ui/pagination";
+
+import { ObjectCard } from "@/components/features/objects/object-card";
+import { useGetObjects } from "@/features/objects/api/use-get-objects";
 
 function ObjectsSkeleton({ viewMode }: { viewMode: "grid" | "list" }) {
     return (
@@ -43,78 +42,68 @@ function ObjectsSkeleton({ viewMode }: { viewMode: "grid" | "list" }) {
     );
 }
 
-// --- MOCK DATA (Тимчасові дані) ---
-const MOCK_RESULTS: ObjectEntity[] = [
-    { id: 1, title: "Lviv Opera House", description: "Complete restoration of the main facade sculptures and roof elements.", tags: ["Baroque", "Restoration"] },
-    { id: 2, title: "Kyiv River Station", description: "Adaptive reuse of the modernist building into a food market and creative space.", tags: ["Modernism", "Adaptive Reuse"]},
-    { id: 3, title: "Sharivka Palace", description: "Emergency conservation works to prevent the collapse of the neo-gothic towers.", tags: ["Neo-Gothic", "Conservation"]},
-    { id: 4, title: "Chernivtsi University", description: "Restoration of the authentic mosaic tiles in the main hall.", tags: ["UNESCO", "Interior"] },
-    { id: 5, title: "Odesa Fine Arts Museum", description: "Underground structural reinforcement and facade painting.", tags: ["Classicism", "Museum"] },
-    { id: 6, title: "Potocki Palace", description: "Landscape design restoration and gate reconstruction.", tags: ["Palace", "Landscape"] },
-    { id: 7, title: "Potocki Palace", description: "Landscape design restoration and gate reconstruction.", tags: ["Palace", "Landscape"] },
-    { id: 8, title: "Potocki Palace", description: "Landscape design restoration and gate reconstruction.", tags: ["Palace", "Landscape"] },
-    { id: 9, title: "Potocki Palace", description: "Landscape design restoration and gate reconstruction.", tags: ["Palace", "Landscape"] },
-];
+const FiltersContent = () => (
+    <div className="space-y-6">
+        <div className="space-y-2">
+            <h3 className="text-sm font-medium tracking-wide text-muted-foreground">TAGS</h3>
+            <div className="flex flex-col gap-2">
+                {["Restoration", "Modernism", "Baroque", "UNESCO"].map((tag) => (
+                    <Button key={tag} variant="ghost" className="justify-start h-8 px-2 text-sm font-normal">
+                        {tag}
+                    </Button>
+                ))}
+            </div>
+        </div>
+
+        <div className="space-y-2">
+            <h3 className="text-sm font-medium tracking-wide text-muted-foreground">COUNTRY</h3>
+            <Select>
+                <SelectTrigger>
+                    <SelectValue placeholder="Select country" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="ua">Ukraine</SelectItem>
+                    <SelectItem value="pl">Poland</SelectItem>
+                    <SelectItem value="us">USA</SelectItem>
+                </SelectContent>
+            </Select>
+        </div>
+    </div>
+);
 
 export default function ObjectsPage() {
     const searchParams = useSearchParams();
-    const searchQuery = searchParams.get("q") || "Architecture";
+    const router = useRouter();
+
+    const page = Number(searchParams.get("page")) || 1;
+    const PAGE_SIZE = 9;
+    const searchQuery = searchParams.get("q") || "";
+
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-    const [isLoading, setIsLoading] = useState(true);
 
-    // Емуляція завантаження даних
-    useEffect(() => {
-        const timer = setTimeout(() => setIsLoading(false), 1500);
-        return () => clearTimeout(timer);
-    }, []);
+    const { data: objects, isLoading, isError, error, isFetching } = useGetObjects(page, PAGE_SIZE);
 
-    // Це "Filters Sidebar", який ми будемо використовувати і на мобілці, і на десктопі
-    const FiltersContent = () => (
-        <div className="space-y-6">
-            <div className="space-y-2">
-                <h3 className="text-sm font-medium tracking-wide text-muted-foreground">TAGS</h3>
-                <div className="flex flex-col gap-2">
-                    {/* Тут будуть твої чекбокси або Shadcn ToggleGroup */}
-                    {["React", "Next.js", "TypeScript", "Tailwind", "Architecture"].map((tag) => (
-                        <Button key={tag} variant="ghost" className="justify-start h-8 px-2 text-sm font-normal">
-                            {tag}
-                        </Button>
-                    ))}
-                </div>
-            </div>
+    const handlePageChange = (newPage: number) => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("page", newPage.toString());
+        router.push(`?${params.toString()}`);
+    };
 
-            <div className="space-y-2">
-                <h3 className="text-sm font-medium tracking-wide text-muted-foreground">COUNTRY</h3>
-                <Select>
-                    <SelectTrigger>
-                        <SelectValue placeholder="Select country" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="ua">Ukraine</SelectItem>
-                        <SelectItem value="pl">Poland</SelectItem>
-                        <SelectItem value="us">USA</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
-        </div>
-    );
+    const isLastPage = objects && objects.length < PAGE_SIZE;
 
     return (
         <div className="container mx-auto px-4 py-8 min-h-screen">
-
-            {/* HEADER: Title & Mobile Filter Trigger */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">
-                        Results for "{searchQuery}"
+                        {searchQuery ? `Results for "${searchQuery}"` : "All Objects"}
                     </h1>
                     <p className="text-muted-foreground mt-1">
-                        Showing 1-12 of 42 objects
+                        {isLoading ? "Loading..." : `Showing page ${page}`}
                     </p>
                 </div>
 
                 <div className="flex items-center gap-2">
-                    {/* Mobile Filters (Sheet) - Видно тільки на мобільному */}
                     <Sheet>
                         <SheetTrigger asChild>
                             <Button variant="outline" className="md:hidden gap-2">
@@ -129,7 +118,6 @@ export default function ObjectsPage() {
                         </SheetContent>
                     </Sheet>
 
-                    {/* Sort Select */}
                     <Select defaultValue="newest">
                         <SelectTrigger className="w-[180px]">
                             <SelectValue placeholder="Sort by" />
@@ -140,7 +128,6 @@ export default function ObjectsPage() {
                         </SelectContent>
                     </Select>
 
-                    {/* View Toggle */}
                     <div className="hidden md:flex p-1 rounded-md">
                         <Button
                             variant={viewMode === "grid" ? "secondary" : "ghost"}
@@ -163,81 +150,83 @@ export default function ObjectsPage() {
             </div>
 
             <div className="flex flex-col md:flex-row gap-8">
-
-                {/* LEFT SIDEBAR (Desktop Filters) - Сховано на моб, видно на десктопі */}
                 <aside className="hidden md:block w-64 shrink-0 space-y-8">
-                    {/* Пошук всередині результатів */}
                     <div className="relative">
                         <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input placeholder="Search tags..." className="pl-8" />
+                        <Input placeholder="Search..." className="pl-8" />
                     </div>
                     <FiltersContent />
-                    <Button className={"w-full"} variant={"outline"} disabled={true}>Clear all</Button>
+                    <Button className={"w-full"} variant={"outline"} disabled>Clear all</Button>
                 </aside>
 
-                {/* MAIN CONTENT */}
                 <main className="flex-1">
                     {isLoading ? (
                         <ObjectsSkeleton viewMode={viewMode} />
-                    ) : (
-                        <div
-                            className={cn(
-                                "grid gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500",
-                                // Логіка сітки:
-                                viewMode === "grid"
-                                    ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" // 3 колонки
-                                    : "grid-cols-1" // 1 колонка (список)
-                            )}
-                        >
-                            {MOCK_RESULTS.map((obj) => (
-                                <ObjectCard
-                                    key={obj.id}
-                                    data={obj}
-                                    viewMode={viewMode}
-                                />
-                            ))}
+                    ) : isError ? (
+                        <div className="text-center py-10 text-red-500">
+                            Error loading objects: {(error as Error).message}
                         </div>
-                    )}
+                    ) : (
+                        <>
+                            <div
+                                className={cn(
+                                    "grid gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500",
+                                    viewMode === "grid"
+                                        ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+                                        : "grid-cols-1",
+                                    isFetching ? "opacity-50 transition-opacity" : "opacity-100"
+                                )}
+                            >
+                                {objects?.map((obj) => (
+                                    <ObjectCard
+                                        key={obj.documentId}
+                                        data={obj}
+                                        viewMode={viewMode}
+                                    />
+                                ))}
 
-                    <div
-                        className="flex justify-center self-start pt-6 w-full"
-                        style={{
-                            all: 'revert',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignSelf: 'flex-start',
-                            paddingTop: '3.5rem',
-                            width: '100%',
-                            fontSize: '14px',
-                            lineHeight: '1.5',
-                            letterSpacing: 'normal'
-                        }}
-                    >
-                        <Pagination>
-                            <PaginationContent>
-                                <PaginationItem>
-                                    <PaginationPrevious href="#" onClick={(e) => e.preventDefault()}/>
-                                </PaginationItem>
-                                <PaginationItem>
-                                    <PaginationLink href="#" onClick={(e) => e.preventDefault()}>1</PaginationLink>
-                                </PaginationItem>
-                                <PaginationItem>
-                                    <PaginationLink href="#" isActive onClick={(e) => e.preventDefault()}>
-                                        2
-                                    </PaginationLink>
-                                </PaginationItem>
-                                <PaginationItem>
-                                    <PaginationLink href="#" onClick={(e) => e.preventDefault()}>3</PaginationLink>
-                                </PaginationItem>
-                                <PaginationItem>
-                                    <PaginationEllipsis/>
-                                </PaginationItem>
-                                <PaginationItem>
-                                    <PaginationNext href="#" onClick={(e) => e.preventDefault()}/>
-                                </PaginationItem>
-                            </PaginationContent>
-                        </Pagination>
-                    </div>
+                                {objects?.length === 0 && (
+                                    <div className="col-span-full text-center py-10 text-muted-foreground">
+                                        No objects found.
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="flex justify-center pt-8 w-full">
+                                <Pagination>
+                                    <PaginationContent>
+                                        <PaginationItem>
+                                            <PaginationPrevious
+                                                href="#"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    if (page > 1) handlePageChange(page - 1);
+                                                }}
+                                                className={page <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                                            />
+                                        </PaginationItem>
+
+                                        <PaginationItem>
+                                            <PaginationLink href="#" isActive onClick={(e) => e.preventDefault()}>
+                                                {page}
+                                            </PaginationLink>
+                                        </PaginationItem>
+
+                                        <PaginationItem>
+                                            <PaginationNext
+                                                href="#"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    if (!isLastPage) handlePageChange(page + 1);
+                                                }}
+                                                className={isLastPage ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                                            />
+                                        </PaginationItem>
+                                    </PaginationContent>
+                                </Pagination>
+                            </div>
+                        </>
+                    )}
                 </main>
             </div>
         </div>

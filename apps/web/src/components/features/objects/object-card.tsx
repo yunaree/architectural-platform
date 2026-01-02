@@ -1,11 +1,11 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Eye } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import type { ObjectEntity } from "@/types/objects";
+import Image from "next/image";
+import { ObjectEntity } from "@/features/objects/types";
 
 interface ObjectCardProps {
     data: ObjectEntity;
@@ -13,20 +13,48 @@ interface ObjectCardProps {
 }
 
 export function ObjectCard({ data, viewMode }: ObjectCardProps) {
+    const STRAPI_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1337";
+
+    const getDescriptionText = (description: any) => {
+        if (!description) return "";
+        if (typeof description === "string") return description;
+        if (Array.isArray(description)) {
+            return description
+                .map((block: any) => {
+                    if (block.children && Array.isArray(block.children)) {
+                        return block.children
+                            .map((child: any) => child.text)
+                            .join("");
+                    }
+                    return "";
+                })
+                .join(" ");
+        }
+        return "";
+    };
+
+    const descriptionText = getDescriptionText(data.description);
+
+    const imageObj = data.afterImage || data.beforeImage;
+    const rawUrl = imageObj?.url;
+
+    const imageUrl = rawUrl
+        ? rawUrl.startsWith("http")
+            ? rawUrl
+            : `${STRAPI_URL}${rawUrl}`
+        : null;
+
     return (
         <div
             className={cn(
                 "group relative overflow-hidden rounded-xl border bg-card text-card-foreground",
-                // 1. БАЗОВА АНІМАЦІЯ КАРТКИ (підняття + тінь + колір рамки)
                 "transition-all duration-300 ease-in-out",
                 "hover:-translate-y-1 hover:shadow-xl hover:border-primary/30 dark:hover:shadow-primary/10",
-
                 viewMode === "list"
                     ? "flex flex-col sm:flex-row gap-4 p-4"
                     : "flex flex-col"
             )}
         >
-            {/* 1. БЛОК ЗОБРАЖЕННЯ */}
             <div
                 className={cn(
                     "relative overflow-hidden bg-muted shrink-0",
@@ -35,51 +63,48 @@ export function ObjectCard({ data, viewMode }: ObjectCardProps) {
                         : "w-full aspect-[4/3]"
                 )}
             >
-                {/* АНІМАЦІЯ КАРТИНКИ: scale-110 при ховері */}
-                {/* Тут ми емулюємо картинку через div, але якщо буде <Image>, дай йому цей клас */}
-                <div className="absolute inset-0 flex items-center justify-center text-muted-foreground/20 font-bold text-4xl select-none bg-secondary/50 transition-transform duration-500 group-hover:scale-110">
-                    IM
-                </div>
+                {imageUrl ? (
+                    <Image
+                        src={imageUrl}
+                        alt={data.title}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        unoptimized
+                    />
+                ) : (
+                    <>
+                        <div className="absolute inset-0 flex items-center justify-center text-muted-foreground/20 font-bold text-4xl select-none bg-secondary/50 transition-transform duration-500 group-hover:scale-110">
+                            IM
+                        </div>
+                        <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/10" />
+                    </>
+                )}
 
-                {/* Оверлей при ховері (затемнення) */}
-                <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/10" />
-
-                {/*<div className="absolute top-2 right-2 z-10">*/}
-                {/*    <Badge variant="secondary" className="backdrop-blur-md bg-background/80 shadow-sm">*/}
-                {/*        {data.status}*/}
-                {/*    </Badge>*/}
-                {/*</div>*/}
-
-                {/* Іконка "ока", яка з'являється тільки в Grid при ховері (опціонально) */}
-                {/*{viewMode === "grid" && (*/}
-                {/*    <Eye className="absolute top-2 right-2 z-10 w-4 h-4 text-muted-foreground opacity-0 -translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0" />*/}
-                {/*)}*/}
+                {imageUrl && (
+                    <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/10" />
+                )}
             </div>
 
-            {/* 2. БЛОК КОНТЕНТУ */}
             <div className={cn("flex flex-col flex-1 gap-2", viewMode === "grid" && "p-4")}>
                 <div className="flex items-start justify-between gap-2">
-                    {/* Заголовок стає кольоровим при ховері */}
                     <h3 className="font-bold text-lg leading-tight transition-colors duration-300 group-hover:text-primary">
                         {data.title}
                     </h3>
-
-
                 </div>
 
                 <p className="text-muted-foreground text-sm line-clamp-2 mb-2">
-                    {data.description}
+                    {descriptionText}
                 </p>
 
                 <div className="flex flex-wrap gap-2 mt-auto">
                     {data.tags.map((tag) => (
-                        <span key={tag} className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded-md border border-transparent transition-colors group-hover:border-border">
-                #{tag}
-            </span>
+                        <span key={tag.documentId} className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded-md border border-transparent transition-colors group-hover:border-border">
+                            #{tag.name}
+                        </span>
                     ))}
                 </div>
 
-                {/* Кнопка в List mode */}
                 {viewMode === "list" && (
                     <div className="mt-4 sm:mt-0 sm:ml-auto self-end sm:self-center">
                         <Button variant="ghost" size="sm" className="gap-1 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
@@ -89,7 +114,7 @@ export function ObjectCard({ data, viewMode }: ObjectCardProps) {
                 )}
             </div>
 
-            <Link href={`/objects/${data.id}`} className="absolute inset-0 z-20" />
+            <Link href={`/objects/${data.slug}`} className="absolute inset-0 z-20" />
         </div>
     );
 }
