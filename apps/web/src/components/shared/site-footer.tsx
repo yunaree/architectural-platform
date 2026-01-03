@@ -1,160 +1,117 @@
 "use client";
 
 import Link from "next/link";
-import { Facebook, Instagram, Linkedin, Twitter, ArrowRight, Command } from "lucide-react";
+import { Facebook, Instagram, Linkedin, Twitter, ArrowRight, Command, Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 
-const footerLinks = {
-    product: [
-        { name: "Features", href: "#" },
-        { name: "Restorations", href: "/objects" },
-        { name: "Pricing", href: "#" },
-        { name: "Case Studies", href: "#" },
-    ],
-    company: [
-        { name: "About", href: "#" },
-        { name: "Blog", href: "#" },
-        { name: "Careers", href: "#" },
-        { name: "Contact", href: "#" },
-    ],
-    resources: [
-        { name: "Documentation", href: "#" },
-        { name: "Help Center", href: "#" },
-        { name: "Community", href: "#" },
-        { name: "Partners", href: "#" },
-    ],
-    legal: [
-        { name: "Privacy Policy", href: "#" },
-        { name: "Terms of Service", href: "#" },
-        { name: "Cookie Policy", href: "#" },
-    ],
-};
-
 export function SiteFooter() {
     return (
         <footer className="bg-background border-t border-border/40">
-            <div className="container mx-auto px-4 py-12 md:py-24">
+            <div className="container mx-auto px-4 py-12 md:py-16 lg:py-20">
 
-                {/* TOP SECTION: Branding & Newsletter */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 mb-16">
                     <div className="space-y-4">
                         <Link href="/" className="flex items-center space-x-2">
-                            <div className="bg-primary text-primary-foreground p-1 rounded-md">
+                            <div className="bg-primary text-primary-foreground p-1.5 rounded-md">
                                 <Command className="h-5 w-5" />
                             </div>
                             <span className="font-bold text-xl tracking-tight">architectural-platform.io</span>
                         </Link>
-                        <p className="text-muted-foreground max-w-sm text-sm leading-relaxed">
-                            Preserving history through digital innovation. Compare, analyze, and witness the rebirth of architectural heritage.
+                        <p className="text-muted-foreground text-sm leading-relaxed max-w-sm">
+                            A digital archive dedicated to preserving and analyzing architectural heritage through modern technology. Compare, visualize, and explore restoration projects.
                         </p>
+                        <div className="flex gap-4 pt-2">
+                            <SocialButton icon={<Github className="h-4 w-4" />} />
+                            <SocialButton icon={<Twitter className="h-4 w-4" />} />
+                            <SocialButton icon={<Instagram className="h-4 w-4" />} />
+                            <SocialButton icon={<Linkedin className="h-4 w-4" />} />
+                        </div>
                     </div>
 
                     <div className="flex flex-col justify-start lg:items-end space-y-4">
-                        <h3 className="font-semibold tracking-tight">Subscribe to our newsletter</h3>
-                        <p className="text-muted-foreground text-sm">
-                            Get the latest updates on new restorations and platform features.
+                        <h3 className="font-semibold text-foreground tracking-tight">Stay updated</h3>
+                        <p className="text-muted-foreground text-sm lg:text-right max-w-sm">
+                            Subscribe to our newsletter to receive the latest updates on new restoration projects and features.
                         </p>
-                        <div className="flex w-full max-w-sm items-center space-x-2">
+                        <form className="flex w-full max-w-sm items-center space-x-2" onSubmit={(e) => e.preventDefault()}>
                             <Input
                                 type="email"
                                 placeholder="Enter your email"
-                                className="bg-secondary/50 border-0 focus-visible:ring-1 focus-visible:ring-primary"
+                                className="bg-secondary/30 border-border focus-visible:ring-primary"
                             />
-                            <Button type="submit" size="icon">
-                                <ArrowRight className="h-4 w-4" />
-                                <span className="sr-only">Subscribe</span>
+                            <Button type="submit">
+                                Subscribe
                             </Button>
-                        </div>
+                        </form>
                     </div>
                 </div>
 
-                <Separator className="my-8 opacity-50" />
+                <Separator className="mb-12 opacity-50" />
 
-                {/* MIDDLE SECTION: Links Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 py-8">
-                    {/* Product Column */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
                     <div className="space-y-4">
-                        <h4 className="text-sm font-medium text-foreground tracking-wider">PRODUCT</h4>
-                        <ul className="space-y-3">
-                            {footerLinks.product.map((link) => (
-                                <li key={link.name}>
-                                    <Link href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                                        {link.name}
-                                    </Link>
-                                </li>
-                            ))}
+                        <h4 className="text-sm font-semibold text-foreground">Platform</h4>
+                        <ul className="space-y-3 text-sm text-muted-foreground">
+                            <li><Link href="/objects" className="hover:text-primary transition-colors">Catalogue</Link></li>
+                            <li><Link href="#" className="hover:text-primary transition-colors">3D Models</Link></li>
+                            <li><Link href="#" className="hover:text-primary transition-colors">Comparisons</Link></li>
+                            <li><Link href="#" className="hover:text-primary transition-colors">Map View</Link></li>
                         </ul>
                     </div>
 
-                    {/* Company Column */}
                     <div className="space-y-4">
-                        <h4 className="text-sm font-medium text-foreground tracking-wider">COMPANY</h4>
-                        <ul className="space-y-3">
-                            {footerLinks.company.map((link) => (
-                                <li key={link.name}>
-                                    <Link href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                                        {link.name}
-                                    </Link>
-                                </li>
-                            ))}
+                        <h4 className="text-sm font-semibold text-foreground">Resources</h4>
+                        <ul className="space-y-3 text-sm text-muted-foreground">
+                            <li><Link href="#" className="hover:text-primary transition-colors">Documentation</Link></li>
+                            <li><Link href="#" className="hover:text-primary transition-colors">Restoration Guidelines</Link></li>
+                            <li><Link href="#" className="hover:text-primary transition-colors">API Reference</Link></li>
+                            <li><Link href="#" className="hover:text-primary transition-colors">Community</Link></li>
                         </ul>
                     </div>
 
-                    {/* Resources Column */}
                     <div className="space-y-4">
-                        <h4 className="text-sm font-medium text-foreground tracking-wider">RESOURCES</h4>
-                        <ul className="space-y-3">
-                            {footerLinks.resources.map((link) => (
-                                <li key={link.name}>
-                                    <Link href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                                        {link.name}
-                                    </Link>
-                                </li>
-                            ))}
+                        <h4 className="text-sm font-semibold text-foreground">Company</h4>
+                        <ul className="space-y-3 text-sm text-muted-foreground">
+                            <li><Link href="#" className="hover:text-primary transition-colors">About Us</Link></li>
+                            <li><Link href="#" className="hover:text-primary transition-colors">Our Mission</Link></li>
+                            <li><Link href="#" className="hover:text-primary transition-colors">Partners</Link></li>
+                            <li><Link href="#" className="hover:text-primary transition-colors">Contact</Link></li>
                         </ul>
                     </div>
 
-                    {/* Legal Column */}
                     <div className="space-y-4">
-                        <h4 className="text-sm font-medium text-foreground tracking-wider">LEGAL</h4>
-                        <ul className="space-y-3">
-                            {footerLinks.legal.map((link) => (
-                                <li key={link.name}>
-                                    <Link href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                                        {link.name}
-                                    </Link>
-                                </li>
-                            ))}
+                        <h4 className="text-sm font-semibold text-foreground">Legal</h4>
+                        <ul className="space-y-3 text-sm text-muted-foreground">
+                            <li><Link href="#" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
+                            <li><Link href="#" className="hover:text-primary transition-colors">Terms of Service</Link></li>
+                            <li><Link href="#" className="hover:text-primary transition-colors">Cookie Policy</Link></li>
                         </ul>
                     </div>
                 </div>
 
-                <Separator className="my-8 opacity-50" />
+                <Separator className="mb-8 opacity-50" />
 
-                {/* BOTTOM SECTION: Copyright & Socials */}
-                <div className="flex flex-col md:flex-row justify-between items-center gap-6 pt-4">
-                    <p className="text-sm text-muted-foreground">
-                        &copy; {new Date().getFullYear()} Architectural Platform. All rights reserved.
-                    </p>
-
-                    <div className="flex items-center gap-4">
-                        <Button variant="ghost" size="icon" className="hover:text-primary text-muted-foreground rounded-full h-8 w-8">
-                            <Twitter className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="hover:text-primary text-muted-foreground rounded-full h-8 w-8">
-                            <Instagram className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="hover:text-primary text-muted-foreground rounded-full h-8 w-8">
-                            <Linkedin className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="hover:text-primary text-muted-foreground rounded-full h-8 w-8">
-                            <Facebook className="h-4 w-4" />
-                        </Button>
+                <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground">
+                    <p>© {new Date().getFullYear()} Architectural Platform. All rights reserved.</p>
+                    <div className="flex items-center gap-8">
+                        <span>Made with ❤️ for Architecture</span>
                     </div>
                 </div>
             </div>
         </footer>
     );
+}
+
+function SocialButton({ icon }: { icon: React.ReactNode }) {
+    return (
+        <Button
+            variant="outline"
+            size="icon"
+            className="rounded-full h-9 w-9 bg-background hover:bg-primary hover:text-primary-foreground border-border/60 transition-colors"
+        >
+            {icon}
+        </Button>
+    )
 }

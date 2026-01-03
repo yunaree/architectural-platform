@@ -6,7 +6,6 @@ import {TextRevealButton} from "@/components/ui/shadcn-io/text-reveal-button";
 import {MagneticButton} from "@/components/ui/shadcn-io/magnetic-button";
 import {Sparkles} from "lucide-react";
 
-// MOCK DATA (Тестові дані, які пізніше замінимо на запит до Strapi)
 const FEATURED_OBJECTS = [
     {
         id: 1,

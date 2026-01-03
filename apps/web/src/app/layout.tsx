@@ -11,7 +11,7 @@ import {SnowToggle} from "@/components/features/snowfall/snow-toggle";
 import Providers from "@/app/providers";
 
 export const metadata: Metadata = {
-  title: "ArchiCompare",
+  title: "architectural-platform.io",
   description: "Architectural comparison platform",
 };
 
@@ -29,7 +29,7 @@ export default function RootLayout({
         <body
             className={cn(
                 "min-h-screen bg-background font-sans antialiased",
-                inter.variable // Додав змінну шрифта, щоб font-sans працював коректно
+                inter.variable
             )}
         >
         <Providers>
@@ -50,7 +50,6 @@ export default function RootLayout({
                 </div>
 
                 <div className="fixed bottom-6 right-6 z-50 hidden md:block">
-                    {/* Можна використати variant="minimal", якщо хочеш просто кружечок */}
                     <SnowToggle variant="full" className="shadow-lg border-primary/20" />
                 </div>
 

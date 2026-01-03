@@ -10,28 +10,28 @@ export interface Tag {
     documentId: string;
     name: string;
     slug: string;
+    objects?: { count: number }
 }
 
 export interface Country {
-    id: string;
+    documentId: string;
     name: string;
-    code?: string;
+    code: string;
 }
 
 export interface ObjectEntity {
     documentId: string;
     title: string;
     slug: string;
-    description: any; // Це поле типу "Rich text (Blocks)", воно повертає JSON масив блоків
+    description: any;
     year: number;
     views: number;
-    locationCoords: any; // Це JSON поле
+    locationCoords: any;
 
     beforeImage?: StrapiImage;
     afterImage?: StrapiImage;
     modelFile?: StrapiImage;
 
-    // Зв'язки
     tags: Tag[];
     country?: Country;
 }

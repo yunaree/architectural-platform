@@ -16,11 +16,11 @@ export function SnowOverlay() {
                     width: "100vw",
                     height: "100vh",
                 }}
-                snowflakeCount={150} // Оптимальна кількість, щоб не лагало
-                radius={[0.5, 3.0]} // Різний розмір сніжинок
-                speed={[0.5, 2.5]} // Швидкість падіння
-                wind={[-0.5, 2.0]} // Ефект вітру
-                color="#ffffff" // Можна змінити на легкий блакитний, якщо фон білий
+                snowflakeCount={150}
+                radius={[0.5, 3.0]}
+                speed={[0.5, 2.5]}
+                wind={[-0.5, 2.0]}
+                color="#ffffff"
             />
         </div>
     )

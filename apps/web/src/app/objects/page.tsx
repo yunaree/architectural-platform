@@ -1,233 +1,151 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { LayoutGrid, List, SlidersHorizontal, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
-import {
-    Pagination,
-    PaginationContent,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-} from "@/components/ui/pagination";
-
-import { ObjectCard } from "@/components/features/objects/object-card";
 import { useGetObjects } from "@/features/objects/api/use-get-objects";
+import { FiltersSidebar } from "@/components/features/objects/filters-sidebar";
+import { ObjectsHeader } from "@/components/features/objects/list/objects-header";
+import { ObjectsGrid } from "@/components/features/objects/list/objects-grid";
+import { ObjectsPagination } from "@/components/features/objects/list/objects-pagination";
+import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
 
-function ObjectsSkeleton({ viewMode }: { viewMode: "grid" | "list" }) {
+export default function ObjectsPage() {
     return (
-        <div className={cn(
-            "grid gap-6",
-            viewMode === "grid"
-                ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-                : "grid-cols-1"
-        )}>
-            {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className={cn("flex flex-col gap-3", viewMode === "list" && "flex-row h-40")}>
-                    <Skeleton className={cn("rounded-xl", viewMode === "grid" ? "h-[250px] w-full" : "h-full w-[200px]")} />
-                    <div className="space-y-2 flex-1 py-2">
-                        <Skeleton className="h-4 w-[250px]" />
-                        <Skeleton className="h-4 w-[200px]" />
-                    </div>
-                </div>
-            ))}
-        </div>
+        <Suspense fallback={<div className="min-h-screen" />}>
+            <ObjectsPageContent />
+        </Suspense>
     );
 }
 
-const FiltersContent = () => (
-    <div className="space-y-6">
-        <div className="space-y-2">
-            <h3 className="text-sm font-medium tracking-wide text-muted-foreground">TAGS</h3>
-            <div className="flex flex-col gap-2">
-                {["Restoration", "Modernism", "Baroque", "UNESCO"].map((tag) => (
-                    <Button key={tag} variant="ghost" className="justify-start h-8 px-2 text-sm font-normal">
-                        {tag}
-                    </Button>
-                ))}
-            </div>
-        </div>
-
-        <div className="space-y-2">
-            <h3 className="text-sm font-medium tracking-wide text-muted-foreground">COUNTRY</h3>
-            <Select>
-                <SelectTrigger>
-                    <SelectValue placeholder="Select country" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="ua">Ukraine</SelectItem>
-                    <SelectItem value="pl">Poland</SelectItem>
-                    <SelectItem value="us">USA</SelectItem>
-                </SelectContent>
-            </Select>
-        </div>
-    </div>
-);
-
-export default function ObjectsPage() {
+function ObjectsPageContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
-
     const page = Number(searchParams.get("page")) || 1;
     const PAGE_SIZE = 9;
     const searchQuery = searchParams.get("q") || "";
+    const selectedTags = searchParams.get("tags") ? searchParams.get("tags")!.split(",") : [];
+    const selectedCountry = searchParams.get("country");
+    const sortParam = searchParams.get("sort") || "newest";
 
+    const sortQuery = sortParam === "popular" ? ["views:desc"] : ["publishedAt:desc"];
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-    const { data: objects, isLoading, isError, error, isFetching } = useGetObjects(page, PAGE_SIZE);
+    const { data: objects, isLoading, isError, error, isFetching } = useGetObjects(
+        page,
+        PAGE_SIZE,
+        searchQuery,
+        selectedTags,
+        selectedCountry,
+        sortQuery
+    );
 
-    const handlePageChange = (newPage: number) => {
+    // --- Params Logic ---
+    const updateParams = (newParams: Record<string, string | null>) => {
         const params = new URLSearchParams(searchParams.toString());
-        params.set("page", newPage.toString());
+        Object.entries(newParams).forEach(([key, value]) => {
+            if (value === null || value === "") params.delete(key);
+            else params.set(key, value);
+        });
+        if (newParams.tags !== undefined || newParams.country !== undefined) params.set("page", "1");
         router.push(`?${params.toString()}`);
     };
 
-    const isLastPage = objects && objects.length < PAGE_SIZE;
+    const handleTagToggle = (slug: string) => {
+        const newTags = selectedTags.includes(slug)
+            ? selectedTags.filter(t => t !== slug)
+            : [...selectedTags, slug];
+        updateParams({ tags: newTags.length > 0 ? newTags.join(",") : null });
+    };
+
+    const handleCountryChange = (code: string) => updateParams({ country: code || null });
+    const handleSortChange = (value: string) => updateParams({ sort: value });
+    const handlePageChange = (newPage: number) => updateParams({ page: newPage.toString() });
+    const handleClearAll = () => router.push("/objects");
+    const isLastPage = objects ? objects.length < PAGE_SIZE : true;
 
     return (
-        <div className="container mx-auto px-4 py-8 min-h-screen">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">
-                        {searchQuery ? `Results for "${searchQuery}"` : "All Objects"}
-                    </h1>
-                    <p className="text-muted-foreground mt-1">
-                        {isLoading ? "Loading..." : `Showing page ${page}`}
-                    </p>
+        <div className="min-h-screen bg-background relative">
+            {/* Background Grid Pattern */}
+            <div className="absolute inset-0 z-0 h-full w-full bg-background bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+
+            <div className="container mx-auto px-4 relative z-10">
+                {/* Header Section with Border */}
+                <div className="py-8 border-b border-border/50">
+                    <ObjectsHeader
+                        searchQuery={searchQuery}
+                        isLoading={isLoading}
+                        page={page}
+                        sortParam={sortParam}
+                        onSortChange={handleSortChange}
+                        viewMode={viewMode}
+                        setViewMode={setViewMode}
+                        filterProps={{
+                            selectedTags,
+                            selectedCountry,
+                            onTagToggle: handleTagToggle,
+                            onCountryChange: handleCountryChange
+                        }}
+                    />
                 </div>
 
-                <div className="flex items-center gap-2">
-                    <Sheet>
-                        <SheetTrigger asChild>
-                            <Button variant="outline" className="md:hidden gap-2">
-                                <SlidersHorizontal className="h-4 w-4" /> Filters
-                            </Button>
-                        </SheetTrigger>
-                        <SheetContent side="left">
-                            <SheetHeader className="mb-4">
-                                <SheetTitle>Filters</SheetTitle>
-                            </SheetHeader>
-                            <FiltersContent />
-                        </SheetContent>
-                    </Sheet>
+                <div className="flex flex-col md:flex-row gap-8 py-8 items-start">
+                    {/* Sticky Sidebar */}
+                    <aside className="hidden md:block w-64 shrink-0 sticky top-24 h-[calc(100vh-8rem)] overflow-y-auto pr-2 scrollbar-none">
+                        <div className="space-y-8 pb-10">
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
+                                    Config / Filters
+                                </span>
+                                {(selectedTags.length > 0 || selectedCountry) && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={handleClearAll}
+                                        className="h-6 text-xs text-muted-foreground hover:text-foreground px-2"
+                                    >
+                                        Reset <X className="ml-1 w-3 h-3" />
+                                    </Button>
+                                )}
+                            </div>
 
-                    <Select defaultValue="newest">
-                        <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Sort by" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="newest">Newest first</SelectItem>
-                            <SelectItem value="popular">Most popular</SelectItem>
-                        </SelectContent>
-                    </Select>
-
-                    <div className="hidden md:flex p-1 rounded-md">
-                        <Button
-                            variant={viewMode === "grid" ? "secondary" : "ghost"}
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => setViewMode("grid")}
-                        >
-                            <LayoutGrid className="h-4 w-4" />
-                        </Button>
-                        <Button
-                            variant={viewMode === "list" ? "secondary" : "ghost"}
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => setViewMode("list")}
-                        >
-                            <List className="h-4 w-4" />
-                        </Button>
-                    </div>
-                </div>
-            </div>
-
-            <div className="flex flex-col md:flex-row gap-8">
-                <aside className="hidden md:block w-64 shrink-0 space-y-8">
-                    <div className="relative">
-                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input placeholder="Search..." className="pl-8" />
-                    </div>
-                    <FiltersContent />
-                    <Button className={"w-full"} variant={"outline"} disabled>Clear all</Button>
-                </aside>
-
-                <main className="flex-1">
-                    {isLoading ? (
-                        <ObjectsSkeleton viewMode={viewMode} />
-                    ) : isError ? (
-                        <div className="text-center py-10 text-red-500">
-                            Error loading objects: {(error as Error).message}
+                            <FiltersSidebar
+                                selectedTags={selectedTags}
+                                selectedCountry={selectedCountry}
+                                onTagToggle={handleTagToggle}
+                                onCountryChange={handleCountryChange}
+                            />
                         </div>
-                    ) : (
-                        <>
-                            <div
-                                className={cn(
-                                    "grid gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500",
-                                    viewMode === "grid"
-                                        ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-                                        : "grid-cols-1",
-                                    isFetching ? "opacity-50 transition-opacity" : "opacity-100"
-                                )}
-                            >
-                                {objects?.map((obj) => (
-                                    <ObjectCard
-                                        key={obj.documentId}
-                                        data={obj}
-                                        viewMode={viewMode}
-                                    />
-                                ))}
+                    </aside>
 
-                                {objects?.length === 0 && (
-                                    <div className="col-span-full text-center py-10 text-muted-foreground">
-                                        No objects found.
-                                    </div>
-                                )}
+                    <main className="flex-1 min-w-0">
+                        <div className="mb-6 flex items-center gap-2 text-xs font-mono text-muted-foreground">
+                            <div className="h-2 w-2 rounded-full bg-green-500/50 animate-pulse" />
+                            <span>System: Online</span>
+                            <span className="text-border">|</span>
+                            <span>Loaded: {objects?.length || 0} items</span>
+                        </div>
+
+                        <ObjectsGrid
+                            isLoading={isLoading}
+                            isError={isError}
+                            error={error}
+                            isFetching={isFetching}
+                            objects={objects}
+                            viewMode={viewMode}
+                        />
+
+                        {objects && objects.length > 0 && (
+                            <div className="mt-12 border-t border-border/50 pt-8">
+                                <ObjectsPagination
+                                    page={page}
+                                    isLastPage={isLastPage}
+                                    onPageChange={handlePageChange}
+                                />
                             </div>
-
-                            <div className="flex justify-center pt-8 w-full">
-                                <Pagination>
-                                    <PaginationContent>
-                                        <PaginationItem>
-                                            <PaginationPrevious
-                                                href="#"
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    if (page > 1) handlePageChange(page - 1);
-                                                }}
-                                                className={page <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                                            />
-                                        </PaginationItem>
-
-                                        <PaginationItem>
-                                            <PaginationLink href="#" isActive onClick={(e) => e.preventDefault()}>
-                                                {page}
-                                            </PaginationLink>
-                                        </PaginationItem>
-
-                                        <PaginationItem>
-                                            <PaginationNext
-                                                href="#"
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    if (!isLastPage) handlePageChange(page + 1);
-                                                }}
-                                                className={isLastPage ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                                            />
-                                        </PaginationItem>
-                                    </PaginationContent>
-                                </Pagination>
-                            </div>
-                        </>
-                    )}
-                </main>
+                        )}
+                    </main>
+                </div>
             </div>
         </div>
     );

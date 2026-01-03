@@ -98,8 +98,11 @@ export function ObjectCard({ data, viewMode }: ObjectCardProps) {
                 </p>
 
                 <div className="flex flex-wrap gap-2 mt-auto">
-                    {data.tags.map((tag) => (
-                        <span key={tag.documentId} className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded-md border border-transparent transition-colors group-hover:border-border">
+                    {data.tags.map((tag, index) => (
+                        <span
+                            key={tag.documentId || tag.slug || index}
+                            className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded-md border border-transparent transition-colors group-hover:border-border"
+                        >
                             #{tag.name}
                         </span>
                     ))}

@@ -25,7 +25,6 @@ export function FeatureCard({ title, description, href = "/", gradient }: Featur
             </span>
                     </div>
 
-                    {/* Блок з градієнтом */}
                     <div className={cn(
                         "flex flex-1 w-full rounded-lg mt-4 bg-gradient-to-br",
                         gradient
