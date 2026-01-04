@@ -58,3 +58,78 @@ Ensure you have the following installed:
 ```bash
 git clone [https://github.com/yunaree/architectural-archive.git](https://github.com/yunaree/architectural-archive.git)
 cd architectural-archive
+```
+
+### 2. Setup Database (Docker)
+
+We use Docker Compose to spin up a local PostgreSQL instance and pgAdmin.
+
+```bash
+# Start the database container in detached mode
+docker-compose up -d
+```
+
+### 3. Install Dependencies
+
+Install dependencies for both frontend and backend (root directory):
+
+```bash
+npm install
+```
+
+### 4. Configure Environment Variables
+
+Backend (apps/backend/.env)
+Create a .env file in the apps/backend folder. You can copy the following default configuration for local development:
+
+```bash
+HOST=0.0.0.0
+PORT=1337
+# Strapi Security Keys (Generate new ones for production)
+APP_KEYS=toBeModified1,toBeModified2
+API_TOKEN_SALT=toBeModified
+ADMIN_JWT_SECRET=toBeModified
+TRANSFER_TOKEN_SALT=toBeModified
+JWT_SECRET=toBeModified
+
+# Database Configuration (Matches docker-compose.yml)
+DATABASE_CLIENT=postgres
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_NAME=architectural_platform
+DATABASE_USERNAME=postgres
+DATABASE_PASSWORD=postgres
+DATABASE_SSL=false
+
+# Cloudinary (Optional for local dev, required for images in production)
+# CLOUDINARY_NAME=your_cloud_name
+# CLOUDINARY_KEY=your_key
+# CLOUDINARY_SECRET=your_secret
+```
+
+Frontend (apps/web/.env.local)
+Create a .env.local file in the apps/web folder:
+
+```bash
+# URL of your local Strapi instance
+NEXT_PUBLIC_API_URL=http://localhost:1337
+```
+
+## Project Structure
+
+```bash
+.
+├── docker-compose.yml       # Local database configuration
+├── apps/
+│   ├── backend/             # Strapi CMS (Content Types, API)
+│   └── web/                 # Next.js Application
+│       ├── public/          # Static assets
+│       ├── src/
+│       │   ├── app/         # Next.js App Router Pages
+│       │   ├── components/  # React Components
+│       │   │   ├── features/# Domain-specific components (Home, Objects)
+│       │   │   └── ui/      # Reusable UI elements (Buttons, Inputs)
+│       │   ├── features/    # Business logic (API hooks, Types)
+│       │   └── lib/         # Utilities & Helpers
+```
+
